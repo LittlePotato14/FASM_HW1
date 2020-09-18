@@ -1,0 +1,89 @@
+format PE console
+
+entry start
+
+include 'win32a.inc'
+
+section '.data' data readable writeable
+
+        formatNum db '%d', 0
+
+        resStr db 'Result: %d', 0
+        point db ',', 0
+        emptyStr db '%d', 0
+        fnStr db 'Input first number: ', 0
+        snStr db 'Input second number: ', 0
+
+        A dd ?
+        B dd ?
+        C dd ?
+
+        NULL = 0
+
+section '.code' code readable executable
+
+        start:
+                push fnStr
+                call [printf]
+
+                push A
+                push formatNum
+                call [scanf]
+
+                push snStr
+                call [printf]
+
+                push B
+                push formatNum
+                call [scanf]
+
+                mov eax, [A]
+                mov ecx, [B]
+                mov edx, 0
+
+                div ecx
+                mov [C], edx
+
+                push eax
+                push resStr
+                call [printf]
+
+                push point
+                call [printf]
+
+                mov ebx, 0
+                lp:
+                        mov eax, [C]
+                        mov ecx, [B]
+                        imul eax, 10
+
+                        mov edx, 0
+                        div ecx
+                        mov [C], edx
+
+                        push eax
+                        push emptyStr
+                        call [printf]
+
+                        add ebx, 1
+                        cmp ebx, 3
+                jne lp
+
+
+                call [getch]
+
+                push NULL
+                call [ExitProcess]
+
+section '.idata' import data readable
+
+        library kernel, 'kernel32.dll',\
+                msvcrt, 'msvcrt.dll'
+
+        import kernel,\
+               ExitProcess, 'ExitProcess'
+
+        import msvcrt,\
+               printf, 'printf',\
+               getch, '_getch',\
+               scanf, 'scanf'
